@@ -9,8 +9,8 @@ def set_parameter_in_file(filename_input, filename_output, parameters: Dict[str,
             for line in finput:
                 for parameter_name, parameter_value in parameters.items():
                     templated_parameter_name = make_template_parameter(parameter_name)
-                    line_fixed = line.replace(templated_parameter_name, parameter_value)
-                foutput.write(line_fixed)
+                    line = line.replace(templated_parameter_name, parameter_value)
+                foutput.write(line)
 
 def set_parameters_in_files(filenames_in_out: Dict[str, str], parameters: Dict[str, str]):
     for filename_in, filename_out in filenames_in_out.items():
