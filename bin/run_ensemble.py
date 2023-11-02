@@ -3,7 +3,6 @@ import argparse
 import os
 import csv
 import sys
-import subprocess
 import multiprocessing
 import tqdm
 
@@ -30,8 +29,16 @@ if __name__ == "__main__":
         help="File containing additional arguments to pass to flow. One argument per line.",
     )
     parser.add_argument(
-        "--concurrent-samples", type=int, default=1, 
-        help="Number of concurrent samples to run."
+        "--concurrent-samples",
+        type=int,
+        default=1,
+        help="Number of concurrent samples to run.",
+    )
+    parser.add_argument(
+        "--submitter",
+        type=str,
+        default="bash",
+        help="Submitter to use. Options: bash, hq.",
     )
 
     parser.add_argument("--flowpath", default="flow", help="Path to run flow.")
@@ -57,41 +64,40 @@ if __name__ == "__main__":
     with open(args.parametersfile) as f:
         reader = csv.DictReader(f)
         for l in reader:
-            sampleid = l['']
+            sampleid = l[""]
             all_samples.append(sampleid)
             sdir = sampledir(sampleid)
             os.makedirs(sdir, exist_ok=True)
 
-            with open(os.path.join(sdir, 'parameters.txt'), 'w') as parout:
+            with open(os.path.join(sdir, "parameters.txt"), "w") as parout:
                 # TODO: Write with the csv package instead.
                 keys = list(l.keys())
-                
+
                 values = [l[k] for k in keys]
                 parout.write(",".join(keys))
                 parout.write("\n")
                 parout.write(",".join(values))
                 parout.write("\n")
 
-    def run_for_sample(sampleid):
-        arguments_to_sample = [
-            sys.executable, 
-            os.path.realpath(sys.argv[0]).replace(os.path.basename(sys.argv[0]), "run_with_parameters.py"),
-            "--inputfile", args.inputfile,
-            "--outputdir", sampledir(sampleid),
-            "--parametersfile", os.path.join(sampledir(sampleid), 'parameters.txt'),
-            '--flowpath', args.flowpath
-        ]
-        if args.dry_run:
-            arguments_to_sample.append('--dry-run')
-        if args.args_to_flow is not None:
-            arguments_to_sample.append(f'--args_to_flow={args.args_to_flow}')
-        with open(os.path.join(sampledir(sampleid), "flow.stdout"), "w") as stdoutfile:
-            with open(os.path.join(sampledir(sampleid), "flow.stderr"), "w") as stderrfile:
-                subprocess.run(arguments_to_sample, check=True, stderr=stderrfile, stdout=stdoutfile)
+    submitter = opm_runner.submitter.make_submitter(args.submitter)
+    runscript = (
+        os.path.realpath(sys.argv[0]).replace(
+            os.path.basename(sys.argv[0]), "run_with_parameters.py"
+        ),
+    )
+    sample_runner = opm_runner.SampleRunner(
+        submitter=submitter,
+        script=runscript,
+        inputfile=args.inputfile,
+        flowpath=args.flowpath,
+        args_to_flow=args.args_to_flow,
+        dry_run=args.dry_run,
+        sampledir=sampledir,
+    )
 
-        return sampleid
-
-    with multiprocessing.Pool(args.concurrent_samples) as pool:  
+    with multiprocessing.Pool(args.concurrent_samples) as pool:
         # Get a nice TQDM bar, see for instance:https://stackoverflow.com/questions/41920124/multiprocessing-use-tqdm-to-display-a-progress-bar
-        for _ in tqdm.tqdm(pool.imap(run_for_sample, all_samples), total=len(all_samples)):
+        for _ in tqdm.tqdm(
+            pool.imap(sample_runner, all_samples), total=len(all_samples)
+        ):
             pass
