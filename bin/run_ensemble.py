@@ -12,7 +12,9 @@ if __name__ == "__main__":
         Runs OPM Flow across a set of parameters
     """
     )
-    parser.add_argument("--inputfile", type=str, help="Input datafile (.DATA)")
+    parser.add_argument(
+        "--inputfile", required=True, type=str, help="Input datafile (.DATA)"
+    )
     parser.add_argument(
         "--outputdir", required=True, help="Output path (should be a directory)."
     )
@@ -45,6 +47,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    if not os.path.exists(args.outputdir):
+        os.makedirs(args.outputdir, exist_ok=True)
     assert os.path.isdir(args.outputdir)
     assert os.path.exists(args.parametersfile)
     assert not os.path.isdir(args.parametersfile)
@@ -58,7 +62,7 @@ if __name__ == "__main__":
     ):
         raise Exception(f"{args.inputfile} is in output directory {args.outputdir}.")
 
-    sampledir = lambda sample: os.path.join(args.outputdir, f"sample_{sample}")
+    sampledir = opm_runner.SampleDir(args.outputdir)
 
     all_samples = []
     with open(args.parametersfile) as f:
@@ -80,11 +84,10 @@ if __name__ == "__main__":
                 parout.write("\n")
 
     submitter = opm_runner.submitter.make_submitter(args.submitter)
-    runscript = (
-        os.path.realpath(sys.argv[0]).replace(
-            os.path.basename(sys.argv[0]), "run_with_parameters.py"
-        ),
+    runscript = os.path.realpath(sys.argv[0]).replace(
+        os.path.basename(sys.argv[0]), "run_with_parameters.py"
     )
+
     sample_runner = opm_runner.SampleRunner(
         submitter=submitter,
         script=runscript,
