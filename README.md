@@ -25,4 +25,16 @@ python bin/run_ensemble.py \
     --concurrent-samples=1
 ```
 
+# Running upscaled SPE1
+
+To run the upscaled SPE1 example included, run
+
+```bash
+python bin/run_ensemble.py \
+    --inputfile test_data/spe1/SPE1ENSEMBLE.DATA \
+    --outputdir testdir \
+    --parametersfile test_data/montecarlo.csv \
+    --flowpath /path/to/flow \
+    --concurrent-samples=1
+```
 
