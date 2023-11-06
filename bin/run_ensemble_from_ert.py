@@ -55,8 +55,10 @@ if __name__ == "__main__":
     if args.args_to_flow is not None:
         arguments.extend(["--args-to-flow", args.args_to_flow])
 
+    arguments.extend(['--flowpath', args.flowpath])
     runscript = os.path.realpath(sys.argv[0]).replace(
         os.path.basename(sys.argv[0]), "run_ensemble.py"
+
     )
     command = [sys.executable, runscript, *arguments]
 

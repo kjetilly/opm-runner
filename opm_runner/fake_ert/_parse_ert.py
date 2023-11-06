@@ -6,10 +6,10 @@ def parse_ert(ertfilepath):
     state = ERTBuilder()
 
     handler = collections.defaultdict(
-        lambda state, keyword, value: print(f"Warning: Ignoring keyword {keyword}.")
+        lambda : (lambda state, keyword, value: print(f"Warning: Ignoring keyword {keyword}."))
     )
 
-    handler.extend(
+    handler.update(
         {
             "NUM_REALIZATIONS": lambda s, k, v: s.set_number_of_samples(int(v[0])),
             "QUEUE_SYSTEM": lambda s, k, v: s.set_submitter(v[0].lower()),
@@ -27,6 +27,8 @@ def parse_ert(ertfilepath):
             line = line.strip()
             sline = line.split()
 
+            if len(sline) < 1:
+                continue
             keyword = sline[0]
 
             handler[keyword](state, keyword, sline[1:])

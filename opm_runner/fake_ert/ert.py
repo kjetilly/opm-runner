@@ -36,7 +36,7 @@ class ERT:
         with open(ert_parameterfilename) as f:
             for l in f:
                 ls = l.split()
-                parameter_name = l[0]
+                parameter_name = ls[0]
                 assert ls[1] == 'UNIFORM'
                 vmin = float(ls[2])
                 vmax = float(ls[3])
@@ -44,21 +44,23 @@ class ERT:
 
         parameterfilename = os.path.join(outputdir, "parameters.csv")
         with open(parameterfilename, "w") as parameterfile:
-            writer = csv.DictWriter(parameterfile, fieldnames=list(all_parameters.keys()))
+            writer = csv.DictWriter(parameterfile, fieldnames=[""] + list(all_parameters.keys()) )
             writer.writeheader()
 
             for n in range(self.number_of_samples):
-                writer.writerow({k: v[n] for k, v in all_parameters.items()})
+                rowdict = {k: v[n] for k, v in all_parameters.items()}
+                rowdict[""] = n + 1
+                writer.writerow(rowdict)
         
         casedir = os.path.basename(os.path.dirname(self.data_file))
         outputcasedir = os.path.join(outputdir, casedir)
         os.makedirs(outputcasedir, exist_ok=True)
 
         data_file = os.path.join(outputcasedir, os.path.basename(self.data_file))
-        shutil.copy(self.data_file, data_file)
+        shutil.copy(os.path.join(self.basedir, self.data_file), data_file)
 
-        template_file = os.path.join(outputcasedir, os.path.basename(self.gen_kw['outputfile']))
-        template_file_source = os.path.join(self.basedir, os.path.basename(self.gen_kw['templatefile']))
+        template_file = os.path.join(outputcasedir, self.gen_kw['outputfile'])
+        template_file_source = os.path.join(self.basedir, self.gen_kw['templatefile'])
         shutil.copyfile(template_file_source, template_file)
 
         return parameterfilename, data_file
@@ -70,9 +72,16 @@ class ERT:
             '--inputfile', data_file,
             '--outputdir', os.path.join(outputdir, self.runpath),
             '--parametersfile', parameterfilename,
-            '--concurrent-samples', self.concurrent_samples,
-            '--submitter', self.submitter
+            '--concurrent-samples', str(self.concurrent_samples),
+            '--submitter', self.get_submitter()
         ]
 
+    def get_submitter(self):
+        if self.submitter.lower() == 'local':
+            return 'bash'
+        elif self.submitter.lower() == 'hq':
+            return 'hq'
+        else:
+            raise ValueError(f"Unknown submitter {self.submitter}.")
 
 
