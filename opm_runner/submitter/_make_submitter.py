@@ -8,7 +8,7 @@ def make_submitter(submitter_name):
         return Bash()
     elif submitter_name == 'dry_run':
         return DryRun()
-    elif submitter_name == 'HQ':
+    elif submitter_name == 'hq':
         return HQ()
     else:
         raise ValueError(f"Uknown submitter {submitter_name}.")

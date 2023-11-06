@@ -98,9 +98,5 @@ if __name__ == "__main__":
         sampledir=sampledir,
     )
 
-    with multiprocessing.Pool(args.concurrent_samples) as pool:
-        # Get a nice TQDM bar, see for instance:https://stackoverflow.com/questions/41920124/multiprocessing-use-tqdm-to-display-a-progress-bar
-        for _ in tqdm.tqdm(
-            pool.imap(sample_runner, all_samples), total=len(all_samples)
-        ):
-            pass
+    submitter.runall(args.concurrent_samples, sample_runner, all_samples)
+    submitter.waitall()

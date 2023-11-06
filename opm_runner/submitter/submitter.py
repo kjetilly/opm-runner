@@ -4,3 +4,6 @@ class Submitter:
     
     def waitall(self):
         raise NotImplementedError("Use a subclass of Submitter")
+    
+    def runall(self):
+        raise NotImplementedError("Use a subclass of Submitter")
