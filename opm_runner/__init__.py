@@ -6,3 +6,4 @@ from .cmd_runner import Run, DryRun
 from .sample_runner import SampleRunner
 from .sample_dir import SampleDir
 from . import submitter
+from . import fake_ert
