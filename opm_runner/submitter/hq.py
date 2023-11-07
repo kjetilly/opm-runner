@@ -17,16 +17,32 @@ class HQ(Submitter):
             print(f"Trying to run the following command:\n\t{' '.join(hqcmd)}\nfailed.")
             raise e
         jobid = re.search(
-            r"Job submitted successfully, job ID: ([0-9]+)", runresult.stdout.decode(),
+            r"Job submitted successfully, job ID: ([0-9]+)",
+            runresult.stdout.decode(),
         ).group(1)
 
         self._jobs.append(jobid)
 
     def waitall(self):
-        for id in tqdm(self._jobs, desc="Waiting for samples to complete"):
-            subprocess.run(["hq", "job", "wait", id], check=True, capture_output=True)
+        failed = 0
+        finished = 0
+        with tqdm(self._jobs, desc="Waiting for samples to complete") as t:
+            t.set_postfix(failed=failed, finished=finished)
+            for id in t:
+                try:
+                    with open(f"hq_wait_log_{id}.txt", 'w') as logfile:
+                        subprocess.run(
+                            ["hq", "job", "wait", id],
+                            check=True,
+                            stderr=subprocess.STDOUT,
+                            stdout=logfile,
+                        )
+                    finished += 1
+                except subprocess.CalledProcessError:
+                    failed += 1
+                t.set_postfix(failed=failed, finished=finished)
         return True
 
     def runall(self, concurrent_samples, sample_runner, all_samples):
-        for sample in tqdm(all_samples, desc='Submitting samples'):
+        for sample in tqdm(all_samples, desc="Submitting samples"):
             sample_runner(sample)
