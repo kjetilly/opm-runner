@@ -42,6 +42,12 @@ if __name__ == "__main__":
         default="bash",
         help="Submitter to use. Options: bash, hq.",
     )
+    parser.add_argument(
+        "--sample-dir-fmt",
+        type=str,
+        default="sample_{sample}",
+        help="Sample dir format string. Use {sample} to reference the sample number."
+    )
 
     parser.add_argument("--flowpath", default="flow", help="Path to run flow.")
 
@@ -62,7 +68,7 @@ if __name__ == "__main__":
     ):
         raise Exception(f"{args.inputfile} is in output directory {args.outputdir}.")
 
-    sampledir = opm_runner.SampleDir(args.outputdir)
+    sampledir = opm_runner.SampleDir(args.outputdir, fmtstring=args.sample_dir_fmt)
 
     all_samples = []
     with open(args.parametersfile) as f:

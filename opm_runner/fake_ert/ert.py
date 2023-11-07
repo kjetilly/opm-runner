@@ -16,7 +16,8 @@ class ERT:
         data_file,
         gen_kw,
         random_seed,
-        basedir
+        basedir,
+        sample_dir_fmt
     ):
         self.submitter = submitter
         self.number_of_samples = number_of_samples
@@ -26,6 +27,7 @@ class ERT:
         self.gen_kw = gen_kw
         self.random_seed = random_seed
         self.basedir = basedir
+        self.sample_dir_fmt = sample_dir_fmt
 
     def _make_case_file(self, outputdir):
         os.makedirs(outputdir, exist_ok=True)
@@ -73,7 +75,8 @@ class ERT:
             '--outputdir', os.path.join(outputdir, self.runpath),
             '--parametersfile', parameterfilename,
             '--concurrent-samples', str(self.concurrent_samples),
-            '--submitter', self.get_submitter()
+            '--submitter', self.get_submitter(),
+            '--sample-dir-fmt', self.sample_dir_fmt,
         ]
 
     def get_submitter(self):

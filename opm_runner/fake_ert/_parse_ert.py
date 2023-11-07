@@ -16,7 +16,7 @@ def parse_ert(ertfilepath):
             "QUEUE_OPTION": lambda s, k, v: s.set_concurrent_samples(int(v[2].lower()))
             if v[0] == "LOCAL" and v[1] == "MAX_RUNNING"
             else None,
-            "RUNPATH": lambda s, k, v: s.set_runpath(v[0].split("/")[0]),
+            "RUNPATH": lambda s, k, v: s.set_runpath(v[0].split("/")[0], "/".join(v[0].split("/")[1:])),
             "DATA_FILE": lambda s, k, v: s.set_data_file(v[0]),
             "GEN_KW": lambda s, k, v: s.set_gen_kw(v[1], v[2], v[3]) if v[0] == "MULT_PORO" else print(f"Ignoring GEN_KW {v[0]}."),
             "RANDOM_SEED": lambda s, k, v: s.set_random_seed(int(v[0])),
