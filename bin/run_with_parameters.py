@@ -1,6 +1,16 @@
-import opm_runner
 import argparse
 import os
+import sys
+
+try:
+    import opm_runner
+except ModuleNotFoundError:
+    # TODO: Make this nicer. This is a problem with the 
+    # enviroment exposed through hyperqueue as far as we know
+    opm_runner_path = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
+    sys.path.append(opm_runner_path)
+    import opm_runner
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

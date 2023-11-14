@@ -11,6 +11,7 @@ class ERTBuilder:
         self.gen_kw = None
         self.random_seed = None
         self.basedir = None
+        self.sample_dir_fmt = None
 
     def set_submitter(self, submitter):
         self.submitter = submitter
@@ -21,8 +22,9 @@ class ERTBuilder:
     def set_concurrent_samples(self, concurrent_samples):
         self.concurrent_samples = concurrent_samples
 
-    def set_runpath(self, runpath):
+    def set_runpath(self, runpath, sample_dir_fmt):
         self.runpath = runpath
+        self.sample_dir_fmt = sample_dir_fmt.replace('%d', '{sample}', 1).replace('%d', '0')
 
     def set_data_file(self, data_file):
         self.data_file = data_file
@@ -49,6 +51,7 @@ class ERTBuilder:
         assert self.gen_kw is not None
         assert self.random_seed is not None
         assert self.basedir is not None
+        assert self.sample_dir_fmt is not None
 
         return ERT(
             submitter=self.submitter,
@@ -58,5 +61,6 @@ class ERTBuilder:
             data_file=self.data_file,
             gen_kw=self.gen_kw,
             random_seed=self.random_seed,
-            basedir = self.basedir
+            basedir = self.basedir,
+            sample_dir_fmt = self.sample_dir_fmt
         )

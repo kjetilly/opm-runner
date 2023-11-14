@@ -15,7 +15,6 @@ class OPMFlow:
     def __call__(self, inputfile):
         self.runner([
             self.flowpath,
-            f'--output-dir={os.path.dirname(inputfile)}',
             *self.args,
-            inputfile
-        ], check=True)
+            os.path.basename(inputfile)
+        ], check=True, cwd=os.path.dirname(inputfile))
