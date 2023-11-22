@@ -74,7 +74,10 @@ class HQ(Submitter):
                     threads.append(thread)
 
                 for thread in threads:
-                    thread.join()
+                    try:
+                        thread.join()
+                    except RuntimeError:
+                        pass
             return True
 
     def runall(self, concurrent_samples, sample_runner, all_samples):
