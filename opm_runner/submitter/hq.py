@@ -6,14 +6,24 @@ import threading
 
 
 class HQ(Submitter):
-    def __init__(self):
+    def __init__(self, cpus=1):
         self._jobs = []
+        self._cpus = cpus
 
         self._waitall_lock = threading.RLock()
         self._hq_waitall_lock = threading.RLock()
 
     def __call__(self, cmd, *, stdoutfile, stderrfile, check=True):
-        hqcmd = ["hq", "submit", "--stdout", stdoutfile, "--stderr", stderrfile, *cmd]
+        hqcmd = [
+            "hq",
+            "submit",
+            f"--cpus={self._cpus}",
+            "--stdout",
+            stdoutfile,
+            "--stderr",
+            stderrfile,
+            *cmd,
+        ]
 
         try:
             runresult = subprocess.run(hqcmd, check=True, capture_output=True)
@@ -29,7 +39,7 @@ class HQ(Submitter):
 
     def _wait_for_sample(self, id, progress_bar):
         try:
-            with open(f"hq_wait_log_{id}.txt", 'w') as logfile:
+            with open(f"hq_wait_log_{id}.txt", "w") as logfile:
                 subprocess.run(
                     ["hq", "job", "wait", id],
                     check=True,
@@ -44,22 +54,25 @@ class HQ(Submitter):
         with self._hq_waitall_lock:
             progress_bar.update(1)
             progress_bar.set_postfix(failed=self._failed, finished=self._finished)
-            
 
     def waitall(self):
         # This function is not thread safe:
         with self._waitall_lock:
             self._failed = 0
             self._finished = 0
-            
-            with tqdm(total=len(self._jobs), desc="Waiting for samples to complete") as progress_bar:
+
+            with tqdm(
+                total=len(self._jobs), desc="Waiting for samples to complete"
+            ) as progress_bar:
                 threads = []
                 progress_bar.set_postfix(failed=self._failed, finished=self._finished)
                 for id in self._jobs:
-                    thread = threading.Thread(target=self._wait_for_sample, args=[id, progress_bar])
+                    thread = threading.Thread(
+                        target=self._wait_for_sample, args=[id, progress_bar]
+                    )
                     thread.run()
                     threads.append(thread)
-                    
+
                 for thread in threads:
                     thread.join()
             return True
