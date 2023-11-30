@@ -49,6 +49,14 @@ if __name__ == "__main__":
         help="Sample dir format string. Use {sample} to reference the sample number."
     )
 
+    parser.add_argument(
+        "--cpus-per-sample",
+        default=1,
+        type=int,
+        help="Number of CPUs to allocate per sample(where applicable)"
+    )
+
+
     parser.add_argument("--flowpath", default="flow", help="Path to run flow.")
 
     args = parser.parse_args()
@@ -89,7 +97,7 @@ if __name__ == "__main__":
                 parout.write(",".join(values))
                 parout.write("\n")
 
-    submitter = opm_runner.submitter.make_submitter(args.submitter)
+    submitter = opm_runner.submitter.make_submitter(args.submitter, args.cpus_per_sample)
     runscript = os.path.realpath(sys.argv[0]).replace(
         os.path.basename(sys.argv[0]), "run_with_parameters.py"
     )

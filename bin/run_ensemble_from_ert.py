@@ -35,6 +35,13 @@ if __name__ == "__main__":
         help="ERT file describing the setup.",
     )
 
+    parser.add_argument(
+        "--cpus-per-sample",
+        default=1,
+        type=int,
+        help="Number of CPUs to allocate per sample(where applicable)"
+    )
+
     parser.add_argument("--flowpath", default="flow", help="Path to run flow.")
 
     args = parser.parse_args()
@@ -54,6 +61,8 @@ if __name__ == "__main__":
 
     if args.args_to_flow is not None:
         arguments.extend(["--args-to-flow", args.args_to_flow])
+
+    arguments.extend(['--cpus-per-sample', str(args.cpus_per_sample)])
 
     arguments.extend(['--flowpath', args.flowpath])
     runscript = os.path.realpath(sys.argv[0]).replace(
