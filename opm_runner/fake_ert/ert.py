@@ -58,12 +58,13 @@ class ERT:
         outputcasedir = os.path.join(outputdir, casedir)
         os.makedirs(outputcasedir, exist_ok=True)
 
-        data_file = os.path.join(outputcasedir, os.path.basename(self.data_file))
-        shutil.copy(os.path.join(self.basedir, self.data_file), data_file)
-
         template_file = os.path.join(outputcasedir, self.gen_kw['outputfile'])
         template_file_source = os.path.join(self.basedir, self.gen_kw['templatefile'])
         shutil.copyfile(template_file_source, template_file)
+
+
+        data_file = os.path.join(outputcasedir, os.path.basename(self.data_file))
+        shutil.copy(os.path.join(self.basedir, self.data_file), data_file)
 
         return parameterfilename, data_file
     
